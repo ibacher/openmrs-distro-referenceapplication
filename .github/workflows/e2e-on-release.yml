@@ -28,10 +28,16 @@ jobs:
         run: bash .e2e/extract_tag_numbers.sh >> "$GITHUB_OUTPUT"
 
       - name: Build and Run Containers
-        run: TAG=e2e docker compose --file docker-compose.yml --file docker-compose.override.yml up --build --detach
+        run: TAG=e2e docker compose --file docker-compose-no-volumes.yml --file docker-compose.override.yml up --build --detach
 
       - name: Wait for the backend to start
-        run: while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost/openmrs/login.htm)" != "200" ]]; do sleep 10; done
+        run: |
+          let i=300
+          while [[ $i > 0 && "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost/openmrs/login.htm)" != "200" ]]; do
+            let i=$i-1 
+            echo "$(curl -v http://localhost/openmrs/login.htm)"
+            sleep 10
+          done
 
       - name: Commit and export Containers
         run: sh .e2e/commit_and_export_images.sh
