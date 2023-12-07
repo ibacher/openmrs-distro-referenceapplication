@@ -18,29 +18,29 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          fetch-depth: 10
 
       - name: Checkout to the release commit
         run: git checkout 'HEAD^{/\(release\)}'
 
       - name: Extract version numbers from the spa-build-config.json file
         id: refs
-        run: bash e2e_test_support_files/extract_tag_numbers.sh
+        run: bash .e2e/extract_tag_numbers.sh >> "$GITHUB_OUTPUT"
 
       - name: Build and Run Containers
-        run: docker-compose -f e2e_test_support_files/docker-compose-build.yml up -d
+        run: TAG=e2e docker compose --file docker-compose.yml --file docker-compose.override.yml up --build --detach
 
       - name: Wait for the backend to start
         run: while [[ "$(curl -s -o /dev/null -w ''%{http_code}'' http://localhost/openmrs/login.htm)" != "200" ]]; do sleep 10; done
 
       - name: Commit and export Containers
-        run: sh e2e_test_support_files/commit_and_export_images.sh
+        run: sh .e2e/commit_and_export_images.sh
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3
         with:
           name: e2e_release_env_images
-          path: e2e_release_env_images.tar.gz
+          path: e2e_release_env_images.tgz
           retention-days: 1
 
   run-patient-management-e2e-tests:
@@ -61,13 +61,10 @@ jobs:
 
       - name: Load Docker Images
         run: |
-          gzip -d ${{ steps.tempdir.outputs.tmpdir }}/e2e_release_env_images.tar.gz
-          docker load --input ${{ steps.tempdir.outputs.tmpdir }}/e2e_release_env_images.tar
-          docker image ls -a
+          gzip -d ${{ steps.tempdir.outputs.tmpdir }}/e2e_release_env_images.tar.gz | docker load
 
       - name: Spin up an OpenMRS Instance
-        run: docker-compose up -d
-        working-directory: e2e_test_support_files
+        run: TAG=e2e docker compose up --detach --no-build --pull never --no-build --pull never
 
       - name: Checkout to the Repo's Tag
         uses: actions/checkout@v4
@@ -122,13 +119,10 @@ jobs:
 
       - name: Load Docker Images
         run: |
-          gzip -d ${{ steps.tempdir.outputs.tmpdir }}/e2e_release_env_images.tar.gz
-          docker load --input ${{ steps.tempdir.outputs.tmpdir }}/e2e_release_env_images.tar
-          docker image ls -a
+          gzip -d ${{ steps.tempdir.outputs.tmpdir }}/e2e_release_env_images.tar.gz | docker load
 
       - name: Spin up an OpenMRS Instance
-        run: docker-compose up -d
-        working-directory: e2e_test_support_files
+        run: TAG=e2e docker compose up --detach --no-build --pull never
 
       - name: Checkout to the Repo's Tag
         uses: actions/checkout@v4
@@ -183,13 +177,10 @@ jobs:
 
       - name: Load Docker Images
         run: |
-          gzip -d ${{ steps.tempdir.outputs.tmpdir }}/e2e_release_env_images.tar.gz
-          docker load --input ${{ steps.tempdir.outputs.tmpdir }}/e2e_release_env_images.tar
-          docker image ls -a
+          gzip -d ${{ steps.tempdir.outputs.tmpdir }}/e2e_release_env_images.tar.gz | docker load
 
       - name: Spin up an OpenMRS Instance
-        run: docker-compose up -d
-        working-directory: e2e_test_support_files
+        run: TAG=e2e docker compose up --detach --no-build --pull never
 
       - name: Checkout to the Repo's Tag
         uses: actions/checkout@v4
@@ -244,13 +235,10 @@ jobs:
 
       - name: Load Docker Images
         run: |
-          gzip -d ${{ steps.tempdir.outputs.tmpdir }}/e2e_release_env_images.tar.gz
-          docker load --input ${{ steps.tempdir.outputs.tmpdir }}/e2e_release_env_images.tar
-          docker image ls -a
+          gzip -d ${{ steps.tempdir.outputs.tmpdir }}/e2e_release_env_images.tar.gz | docker load
 
       - name: Spin up an OpenMRS Instance
-        run: docker-compose up -d
-        working-directory: e2e_test_support_files
+        run: TAG=e2e docker compose up --detach --no-build --pull never
 
       - name: Checkout to the Repo's Tag
         uses: actions/checkout@v4
@@ -305,13 +293,10 @@ jobs:
 
       - name: Load Docker Images
         run: |
-          gzip -d ${{ steps.tempdir.outputs.tmpdir }}/e2e_release_env_images.tar.gz
-          docker load --input ${{ steps.tempdir.outputs.tmpdir }}/e2e_release_env_images.tar
-          docker image ls -a
+          gzip -d ${{ steps.tempdir.outputs.tmpdir }}/e2e_release_env_images.tar.gz | docker load
 
       - name: Spin up an OpenMRS Instance
-        run: docker-compose up -d
-        working-directory: e2e_test_support_files
+        run: TAG=e2e docker compose up --detach --no-build --pull never
 
       - name: Checkout to the Repo's Tag
         uses: actions/checkout@v4

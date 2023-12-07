@@ -1,8 +1,9 @@
-name: Build and Validate Configuration
+name: Validate Configuration on PR
 
 on:
   pull_request:
     branches: [main]
+    paths: ['distro/configuration/**/*']
 
 jobs:
   build:
